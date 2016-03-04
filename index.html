@@ -19,43 +19,47 @@
 	<script src="js/pdf.js"></script>
 	<script src="js/pdfRender.js"></script>
 	<script src="js/pdfForms.js"></script>
-	<script src="js/database.js"></script>
 	<script src="js/FileSaver.min.js"></script>
 	<script>
 	'use strict';
 	var formFields = {};
 	
 
-	var peepLen = Users.length;
-	
 	var peeps = document.getElementById("person");
 	
 	var reports = document.getElementById("reports");
 
 
 	reports.addEventListener("change", function(ev){
-		var target = ev.target,
-			thisUser, thisTimesheet;
+		var target = ev.target;
 		if(target.value !== "Select"){
-			thisUser = Users[peeps.value];
-			thisTimesheet = thisUser.timeSheets[ev.target.value];
-			
-			setPdfField("Employee Name", thisUser.name);
-			setPdfField("Person Number", thisUser.id);
-			setPdfField("Report Period", target.options[target.selectedIndex].text);
-			
-			if(thisUser.isFullTime) {
-				setPdfField("Full Time", true);
-			}
-			else {
-				setPdfField("Part Time", true);
-			}
-			renderTimesheet();
+			promisedDatabase.then(function(data){
+				var thisUser = data[peeps.value],
+					thisTimesheet = thisUser.timeSheets[target.value];
+				setPdfField("Employee Name", thisUser.name);
+				setPdfField("Person Number", thisUser.id);
+				setPdfField("Report Period", target.options[target.selectedIndex].text);
+				
+				if(thisUser.isFullTime) {
+					setPdfField("Full Time", true);
+				}
+				else {
+					setPdfField("Part Time", true);
+				}
+				renderTimesheet();
+			});
 		}
 	});
-	while(peepLen--) {
-		peeps.add(new Option(Users[peepLen].name, peepLen));
-	}
+	var promisedDatabase = fetch('/js/database.json').then(function(response) {
+	    return response.json();
+	});
+	
+	promisedDatabase.then(function(data){
+	    var len = data.length;
+	    while(len--){
+	        peeps.add(new Option(data[len].name, len));
+	    }
+	});
 	peeps.addEventListener("change", function(ev) {
 		var curLength = reports.options.length;
 		while(curLength--){
@@ -63,12 +67,15 @@
 		}
 		reports.add(new Option("Select Timesheet", "Select"));
 		if(ev.target.value !== "Select"){
-			var usersTimesheets = Users[ev.target.value].timeSheets;
-			var reportsLen = usersTimesheets.length;
-			while(reportsLen--){
-				var reportPeriod = usersTimesheets[reportsLen]["Report Period"];
-				reports.add(new Option(reportPeriod.Month + " - " + reportPeriod.Year, reportsLen));
-			}
+			promisedDatabase.then(function(data){
+				var usersTimesheets = data[ev.target.value].timeSheets;
+				var timeSheetIndexes = Object.keys(usersTimesheets);
+				var reportsLen = timeSheetIndexes.length;
+				while(reportsLen--){
+					var tsDisplay = timeSheetIndexes[reportsLen]
+					reports.add(new Option(tsDisplay, tsDisplay));
+				}
+			});
 		}
 	})
 	function saveDatabase(){

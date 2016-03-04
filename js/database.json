@@ -1,0 +1,30 @@
+[{
+    "name": "Employee Name",
+    "Start Date": "08/2015",
+    "id": "38012345",
+    "isFullTime": true,
+    "timeSheets":{
+        "2015-01":{
+            "created": "timestamp",
+            "Vacation Taken": 0,
+            "Vacation Dates": "",
+            "Sick Taken": 0,
+            "Sick Dates": "",
+            "Holidays Taken": 0,
+            "Holidays Dates": "",
+            "Holidays Earned": 0,
+            "Holidays Earned Dates": ""
+        },
+        "2016-02": {
+            "created": "timestamp",
+            "Vacation Taken": 0,
+            "Vacation Dates": "",
+            "Sick Taken": 0,
+            "Sick Dates": "",
+            "Holidays Taken": 0,
+            "Holidays Dates": "",
+            "Holidays Earned": 0,
+            "Holidays Earned Dates": ""
+        }
+    }
+}]
