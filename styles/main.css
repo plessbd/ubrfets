@@ -34,3 +34,62 @@
     background: #ccc;
     position: absolute;
 }
+
+.weekend {
+    color: black;
+    background-color: lightgray;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+tr.heading_day th {
+    border-bottom: thin solid darkgrey;
+}
+
+td {
+    padding: 1em;
+    text-align: center;
+}
+
+td.workday {
+    color: black;
+    background-color: white;
+    border: thin solid lightgrey;
+}
+
+td.workday:hover {
+    background-color: lightgrey;
+}
+
+td.holiday {
+    color: black;
+    background-color: mediumseagreen;
+    border: thin solid lightgrey;
+}
+
+td.sick  {
+    color: black;
+    background-color: orange;
+    border: thin solid lightgrey;
+}
+
+td.vacation {
+    color: black;
+    background-color: cornflowerblue;
+    border: thin solid lightgrey;
+}
+
+td:hover {
+    cursor: pointer;
+    opacity: 0.75;
+}
+
+td.weekend, td.weekend:hover {
+    color: black;
+    cursor: inherit;
+    background-color: lightgrey;
+    border: thin solid lightgrey;
+    opacity: 1;
+}

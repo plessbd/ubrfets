@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>UB Reasearch Foundation Timesheet Database</title>
+	<title>UB Research Foundation Timesheet Database</title>
 	<link rel="stylesheet" href="styles/main.css"></link>
 </head>
 
@@ -14,6 +14,8 @@
 		<select id="reports">
 			<option value="Select">Select Timesheet</option>
 		</select>
+		<button id="newtimesheet">New Timesheet</button>
+		<button id="getreport">Get Report</button>
 	</div>
 	<div id="viewer"></div>
 	<script src="js/pdf.js"></script>
@@ -85,6 +87,10 @@
 		saveAs(blob, "timeSheetDatabase.json");
 	}
 	</script>
+	<script src="js/calendar.js"></script>
+
+	<div id="calendar"></div>
+
 </body>
 
 </html>
