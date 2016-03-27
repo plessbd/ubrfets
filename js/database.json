@@ -1,30 +1,29 @@
 [{
     "name": "Employee Name",
-    "Start Date": "08/2015",
+    "hireDate": {
+			"year": 2013,
+			"month": 8,
+			"day": 15
+		},
     "id": "38012345",
+		"initial sick": "10",
+		"initial holiday": "5",
+		"initial vacation": "15",
     "isFullTime": true,
-    "timeSheets":{
-        "2015-01":{
+    "timeSheets": {
+        "2015-01": {
             "created": "timestamp",
-            "Vacation Taken": 0,
-            "Vacation Dates": "",
-            "Sick Taken": 0,
-            "Sick Dates": "",
-            "Holidays Taken": 0,
-            "Holidays Dates": "",
-            "Holidays Earned": 0,
-            "Holidays Earned Dates": ""
+            "Vacation Dates": [],
+            "Sick Dates": [],
+            "Holiday Dates": [1],
+            "Holiday Earned Dates": [1,18]
         },
         "2016-02": {
-            "created": "timestamp",
-            "Vacation Taken": 0,
-            "Vacation Dates": "",
-            "Sick Taken": 0,
-            "Sick Dates": "",
-            "Holidays Taken": 0,
-            "Holidays Dates": "",
-            "Holidays Earned": 0,
-            "Holidays Earned Dates": ""
+					"created": "timestamp",
+					"Vacation Dates": [],
+					"Sick Dates": [],
+					"Holiday Dates": [],
+					"Holiday Earned Dates": [12,15]
         }
     }
 }]

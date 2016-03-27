@@ -11,86 +11,51 @@
 		<select id="person">
 			<option value="Select">Select Person</option>
 		</select>
+		<button id="add-user">New User</button>
 		<select id="reports">
 			<option value="Select">Select Timesheet</option>
 		</select>
 		<button id="newtimesheet">New Timesheet</button>
 		<button id="getreport">Get Report</button>
 	</div>
+	<form id="new-user" style="display:none;">
+		<div style="display:flexbox;">
+			<input id="full-name" type="text" placeholder="Name: John Doe" />
+			<input id="emp-num" type="text" placeholder="Employee Number:3803848" />
+			<input id="hire-date" type="date" placeholder="Hire Date: YYYY-MM-DD" />
+		</div>
+		<div style="display:flexbox;">
+			<input id="initial-holidy" type="number" min="0.00" step="0.01" placeholder="Initial Holiday Hours" />
+			<input id="initial-sick" type="number" min="0.00" step="0.01" placeholder="Initial Sick Hours" />
+			<input id="initial-vacation" type="number" min="0.00" step="0.01" placeholder="Initial Vacation Hours" />
+		</div>
+	</form>
 	<div id="viewer"></div>
+	<div>
+		<div id="calendar">
+		</div>
+		<div style="display:flexbox;visibility:hidden;">
+			<label for="report-vacation">Vacation:
+				<input id="report-vacation">
+			</label>
+			<label for="report-sick">sick:
+				<input id="report-sick">
+			</label>
+			<label for="report-holiday">holiday:
+				<input id="report-holiday">
+			</label>
+		</div>
+	</div>
+
 	<script src="js/pdf.js"></script>
 	<script src="js/pdfRender.js"></script>
 	<script src="js/pdfForms.js"></script>
 	<script src="js/FileSaver.min.js"></script>
-	<script>
-	'use strict';
-	var formFields = {};
-	
-
-	var peeps = document.getElementById("person");
-	
-	var reports = document.getElementById("reports");
-
-
-	reports.addEventListener("change", function(ev){
-		var target = ev.target;
-		if(target.value !== "Select"){
-			promisedDatabase.then(function(data){
-				var thisUser = data[peeps.value],
-					thisTimesheet = thisUser.timeSheets[target.value];
-				setPdfField("Employee Name", thisUser.name);
-				setPdfField("Person Number", thisUser.id);
-				setPdfField("Report Period", target.options[target.selectedIndex].text);
-				
-				if(thisUser.isFullTime) {
-					setPdfField("Full Time", true);
-				}
-				else {
-					setPdfField("Part Time", true);
-				}
-				renderTimesheet();
-			});
-		}
-	});
-	var promisedDatabase = fetch('/js/database.json').then(function(response) {
-	    return response.json();
-	});
-	
-	promisedDatabase.then(function(data){
-	    var len = data.length;
-	    while(len--){
-	        peeps.add(new Option(data[len].name, len));
-	    }
-	});
-	peeps.addEventListener("change", function(ev) {
-		var curLength = reports.options.length;
-		while(curLength--){
-			reports.remove(curLength);
-		}
-		reports.add(new Option("Select Timesheet", "Select"));
-		if(ev.target.value !== "Select"){
-			promisedDatabase.then(function(data){
-				var usersTimesheets = data[ev.target.value].timeSheets;
-				var timeSheetIndexes = Object.keys(usersTimesheets);
-				var reportsLen = timeSheetIndexes.length;
-				while(reportsLen--){
-					var tsDisplay = timeSheetIndexes[reportsLen]
-					reports.add(new Option(tsDisplay, tsDisplay));
-				}
-			});
-		}
-	})
-	function saveDatabase(){
-		var blob = new Blob([JSON.stringify(Users)], {
-			type: "application/json;charset=utf-8"
-		});
-		saveAs(blob, "timeSheetDatabase.json");
-	}
-	</script>
 	<script src="js/calendar.js"></script>
-
-	<div id="calendar"></div>
-
+	<script src="js/nodep-date-input-polyfill.dist.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.4.0/localforage.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
+	<script src="js/breakMeUp.js"></script>
 </body>
 
 </html>

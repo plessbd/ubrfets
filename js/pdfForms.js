@@ -49,4 +49,8 @@ var nameToId = {
 
 var setPdfField = function setPdfField(field, value){
 	formFields[nameToId[field]] = value;
-}
+};
+
+var getPdfFieldValue = function(field){
+	return formFields[nameToId[field]];
+};
