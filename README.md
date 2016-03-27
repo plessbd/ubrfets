@@ -1,10 +1,10 @@
-# UB Reasearch FOundation Exempt Timesheet Database
+# UB Research Foundation Exempt Timesheet Database
 
-This probably wont even bee needed in a few months, but it was a nice side project for the fun of it
+This probably wont even be needed in a few months, but it was a nice side project for the fun of it
 
 TODO:
 - [x] View Filled Out PDF
-- [ ] Add Users
+- [x] Add Users
 - [ ] Add Timesheet
 - [ ] Calculate Values
 - [ ] Add User Auth
