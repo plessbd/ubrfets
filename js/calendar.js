@@ -126,16 +126,19 @@ var newTimesheet = document.getElementById("newtimesheet");
 newTimesheet.addEventListener("click", function(/*evt*/) {
 	var calendar = document.getElementById("calendar");
 	var viewer = document.getElementById("viewer");
+	var calendarReportContainer = document.getElementById("report-container");
 
 	switch(newTimesheet.textContent){
 		case "New Timesheet":
 			viewer.style.display = "none";
 			calendar.style.display = "";
+			calendarReportContainer.style.display = "";
 			showLastMonth();
 			newTimesheet.textContent = "View New Timesheet";
 			break;
 		case "View New Timesheet":
 			calendar.style.display = "none";
+			calendarReportContainer.style.display = "none";
 			viewer.style.display = "";
 			var report = getReport();
 			userOperations.getCurrentUser().then(function(user){
@@ -160,6 +163,7 @@ newTimesheet.addEventListener("click", function(/*evt*/) {
 		case "Save and Download Timesheet":
 			viewer.style.display = "none";
 			calendar.style.display = "none";
+			calendarReportContainer.style.display = "none";
 			newTimesheet.textContent = "New Timesheet";
 			userOperations.getCurrentUser().then(function(user){
 				var timeSheet = {};
@@ -203,12 +207,4 @@ newTimesheet.addEventListener("click", function(/*evt*/) {
 			break;
 	}
 
-});
-document.getElementById("getreport").addEventListener("click", function(/*evt*/) {
-	var report = getReport();
-	var calendar = document.getElementById("calendar");
-
-	if (report) {
-		calendar.innerHTML = "<pre>" + JSON.stringify(report, null, 4) + "</pre>";
-	}
 });

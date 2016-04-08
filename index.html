@@ -25,16 +25,16 @@
 			<input id="hire-date" type="date" placeholder="Hire Date: YYYY-MM-DD" />
 		</div>
 		<div style="display:flexbox;">
-			<input id="initial-holidy" type="number" min="0.00" step="0.01" placeholder="Initial Holiday Hours" />
-			<input id="initial-sick" type="number" min="0.00" step="0.01" placeholder="Initial Sick Hours" />
-			<input id="initial-vacation" type="number" min="0.00" step="0.01" placeholder="Initial Vacation Hours" />
+			<input id="initial-holidy" type="number" min="0.00" step="0.01" placeholder="Initial Holiday Days" />
+			<input id="initial-sick" type="number" min="0.00" step="0.01" placeholder="Initial Sick Days" />
+			<input id="initial-vacation" type="number" min="0.00" step="0.01" placeholder="Initial Vacation Days" />
 		</div>
 	</form>
 	<div id="viewer"></div>
 	<div>
 		<div id="calendar">
 		</div>
-		<div style="display:flexbox;visibility:hidden;">
+		<div id="report-container" style="display:none;">
 			<label for="report-vacation">Vacation:
 				<input id="report-vacation">
 			</label>
