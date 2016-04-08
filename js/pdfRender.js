@@ -1,5 +1,4 @@
 PDFJS.workerSrc = "js/pdf.worker.js";
-var timeSheetPdf = PDFJS.getDocument("rfets.pdf");
 
 function setupForm(div, content, viewport) {
     function bindInputItem(input, item) {
@@ -88,6 +87,8 @@ function setupForm(div, content, viewport) {
                     }
                     input.className = 'inputControl';
                     input.name = item.fullName;
+                    input.id = item.fullName;
+                    //console.log(item.fullName);
                     input.title = item.alternativeText;
                     assignFontStyle(input, item);
                     bindInputItem(input, item);
@@ -139,19 +140,11 @@ function renderTimesheet() {
 
     var viewer = document.getElementById('viewer');
     viewer.innerHTML = "";
-
+    viewer.style.display = "";
+    var timeSheetPdf = PDFJS.getDocument("pdfs/rfts-ft-named-1.7.pdf");
     timeSheetPdf.then(function getPdfForm(pdf) {
-        // Rendering all pages starting from first
-
         var pageNumber = 1;
         renderPage(viewer, pdf, pageNumber++
-            /*, function pageRenderingComplete() {
-            			if (pageNumber > pdf.numPages) {
-            				return; // All pages rendered
-            			}
-            			// Continue rendering of the next page
-            			renderPage(viewer, pdf, pageNumber++, pageRenderingComplete);
-            		}*/
         );
     });
 }

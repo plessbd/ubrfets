@@ -1,6 +1,60 @@
 "use strict";
 
-var formFields = {};
+var formFields = {
+	"EmployeeName": "",
+	"ReportPeriod": "",
+	"PersonNumber": "",
+	"EmpTypeFT": "",
+	"EmpTypePT": "",
+	"MonF": "",
+	"MonT": "",
+	"TueF": "",
+	"TueT": "",
+	"WedF": "",
+	"WedT": "",
+	"ThuF": "",
+	"ThuT": "",
+	"FriF": "",
+	"FriT": "",
+	"VacaNumFT": "",
+	"VacaDatesFT": "",
+	"VacaNumPT": "",
+	"VacaDatesPT": "",
+	"SickNumFT": "",
+	"SickDatesFT": "",
+	"SickNumPT": "",
+	"SickDatesPT": "",
+	"HolidayNumFT": "",
+	"HolidayDatesFT": "",
+	"HolidayNumPT": "",
+	"HolidayDatesPT": "",
+	"EarnedHolidayNumFT": "",
+	"EarnedHolidayDatesFT": "",
+	"EarnedHolidayNumPT": "",
+	"EarnedHolidayDatesPT": "",
+	"VacaPrevBal": "",
+	"SickPrevBal": "",
+	"HolidayPrevBal": "",
+	"VacaEarned": "",
+	"SickEarned": "",
+	"HolidayEarned": "",
+	"EmployeeSignYear": "",
+	"EmployeeSignMonth": "",
+	"EmployeeSignDay": "",
+	"VacaSub": "",
+	"SickSub": "",
+	"HolidaySub": "",
+	"VacaCharged": "",
+	"SickCharged": "",
+	"HolidayCharged": "",
+	"DirectorSignYear": "",
+	"DirectorSignMonth": "",
+	"DirectorSignDay": "",
+	"VacaBalance": "",
+	"SickBalance": "",
+	"HolidayBalance": ""
+};
+
 var peeps = document.getElementById("person");
 var reports = document.getElementById("reports");
 
@@ -22,7 +76,7 @@ localforage.getItem("timesheets").then(function(data){
 });
 var observedHolidays;
 
-fetch('/js/holidays.json').then(function(response){
+fetch("/js/holidays.json").then(function(response){
 	return response.json();
 }).then(function(json) {
 	observedHolidays = json;
@@ -31,6 +85,13 @@ var userOperations = {
 	getCurrentUser: function(){
 		return localforage.getItem("timesheets").then(function(data){
 			return data[peeps.value];
+		});
+	},
+	saveCurrentUser: function(user){
+		localforage.getItem("timesheets").then(function(data){
+			data[peeps.value] = user;
+			localforage.setItem("timesheets", data);
+			loadTimesheets(data);
 		});
 	},
 	getAcrualRates: function(thisUser, reportDate){
@@ -68,47 +129,114 @@ var userOperations = {
 		return acrual;
 	},
 	setPdfFields: function(thisUser, reportDate, timesheet){
-		var acrual = this.getAcrualRates(thisUser, reportDate);
-
-		timesheet["Vacation Charges"] = timesheet["Vacation Charges"] || timesheet["Vacation Dates"].length * 8;
-		timesheet["Sick Charges"] = timesheet["Sick Charges"] || timesheet["Sick Dates"].length * 8;
-		timesheet["Holiday Charges"] = timesheet["Holiday Charges"] || timesheet["Holiday Dates"].length * 8;
-		timesheet["Holiday Earned"] = timesheet["Holiday Earned"] || timesheet["Holiday Earned Dates"].length * 8;
-		setPdfField("Vacation Earned", acrual.vacation);
-		setPdfField("Sick Earned", acrual.sick);
-		setPdfField("Employee Name", thisUser.name);
-		setPdfField("Person Number", thisUser.id);
-		setPdfField("Report Period", reportDate.format("YYYY-MM"));
-		setPdfField("FT Vacation Taken", timesheet["Vacation Dates"].length);
-    setPdfField("FT Vacation Dates", timesheet["Vacation Dates"].join(", "));
-    setPdfField("FT Sick Taken", timesheet["Sick Dates"].length);
-    setPdfField("FT Sick Dates", timesheet["Sick Dates"].join(", "));
-    setPdfField("FT Holidays Taken", timesheet["Holiday Dates"].length);
-    setPdfField("FT Holidays Dates", timesheet["Holiday Dates"].join(", "));
-		setPdfField("Vacation Charges", timesheet["Vacation Charges"]);
-    setPdfField("Sick Charges", timesheet["Sick Charges"]);
-    setPdfField("Holiday Charges", timesheet["Holiday Charges"]);
-		setPdfField("FT Holidays Earned", timesheet["Holiday Earned Dates"].length);
-		setPdfField("FT Holidays Earned Dates", timesheet["Holiday Earned Dates"].join(", "));
-		setPdfField("Holiday Earned", timesheet["Holiday Earned"]);
-		if (thisUser.isFullTime) {
-			setPdfField("Full Time", true);
-		} else {
-			setPdfField("Part Time", true);
+		//TODO Turn into its own function
+		if(!timesheet.hasOwnProperty("VacaEarned") || !timesheet.hasOwnProperty("SickEarned")){
+			var acrual = this.getAcrualRates(thisUser, reportDate);
+			timesheet.VacaEarned = timesheet.VacaEarned || acrual.vacation;
+			timesheet.SickEarned = timesheet.SickEarned || acrual.sick;
 		}
+
+		if(!timesheet.hasOwnProperty("VacaPrevBal") || !timesheet.hasOwnProperty("SickPrevBal") || !timesheet.hasOwnProperty("HolidayPrevBal")){
+			var prevMonth = moment(reportDate).subtract(1, "month");
+			if(thisUser.timesheets.hasOwnProperty(prevMonth)){
+				timesheet.VacaPrevBal = thisUser.timesheets[prevMonth].VacaPrevBal || 0;
+				timesheet.SickPrevBal = thisUser.timesheets[prevMonth].SickPrevBal || 0;
+				timesheet.HolidayPrevBal = thisUser.timesheets[prevMonth].HolidayPrevBal || 0;
+			}
+			else {
+				timesheet.VacaPrevBal = thisUser.initialVacation || 0;
+				timesheet.SickPrevBal = thisUser.initialSick || 0;
+				timesheet.HolidayPrevBal = thisUser.initialHoliday || 0;
+			}
+		}
+
+		timesheet.HolidayEarned = timesheet.HolidayEarned || timesheet.EarnedHolidayDates.length;
+
+		timesheet.VacaSub = timesheet.VacaSub || (timesheet.VacaPrevBal + timesheet.VacaEarned);
+		timesheet.SickSub = timesheet.SickSub || (timesheet.SickPrevBal + timesheet.SickEarned);
+		timesheet.HolidaySub = timesheet.HolidaySub || (timesheet.HolidayPrevBal + timesheet.HolidayEarned);
+
+		timesheet.VacaCharged = timesheet.VacaCharged || timesheet.VacaDates.length || 0;
+		timesheet.SickCharged = timesheet.SickCharged || timesheet.SickDates.length || 0;
+		timesheet.HolidayCharged = timesheet.HolidayCharged || timesheet.HolidayDates.length || 0;
+
+		timesheet.VacaBalance = timesheet.VacaBalance || (timesheet.VacaSub - timesheet.VacaCharged);
+		timesheet.SickBalance = timesheet.SickBalance || (timesheet.SickSub - timesheet.SickCharged);
+		timesheet.HolidayBalance = timesheet.HolidayBalance || (timesheet.HolidaySub - timesheet.HolidayCharged);
+
+		timesheet.EarnedHolidayDates = timesheet.EarnedHolidayDates || [];
+
+		formFields.EmployeeName = thisUser.EmployeeName;
+		formFields.ReportPeriod = reportDate.format("YYYY-MM");
+		formFields.PersonNumber = thisUser.PersonNumber;
+
+		if (thisUser.isFullTime) {
+			formFields.EmpTypeFT = true;
+			if(timesheet.VacaDates){
+				formFields.VacaNumFT = timesheet.VacaDates.length || 0;
+				formFields.VacaDatesFT = timesheet.VacaDates.join(", ") || "";
+			}
+			else {
+				formFields.VacaNumFT = 0;
+				formFields.VacaDatesFT = "";
+			}
+			if(timesheet.SickDates){
+				formFields.SickNumFT = timesheet.SickDates.length || 0;
+				formFields.SickDatesFT = timesheet.SickDates.join(", ") || "";
+			}
+			else {
+				formFields.SickNumFT = 0;
+				formFields.SickDatesFT = "";
+			}
+			if(timesheet.HolidayDates){
+				formFields.HolidayNumFT = timesheet.HolidayDates.length || 0;
+				formFields.HolidayDatesFT = timesheet.HolidayDates.join(", ") || "";
+			}
+			else {
+				formFields.HolidayNumFT = 0;
+				formFields.HolidayDatesFT = "";
+			}
+			if(timesheet.EarnedHolidayDates){
+				formFields.EarnedHolidayNumFT = timesheet.EarnedHolidayDates.length || 0;
+				formFields.EarnedHolidayDatesFT = timesheet.EarnedHolidayDates.join(", ") || "";
+			}
+			else {
+				formFields.EarnedHolidayNumFT = 0;
+				formFields.EarnedHolidayDatesFT = "";
+			}
+		} else {
+			formFields.EmpTypePT = true;
+			formFields.VacaNumPT = timesheet.VacaDates.length || 0;
+			formFields.VacaDatesPT = timesheet.VacaDates.join(", ") || "";
+			formFields.SickNumPT = timesheet.SickDates.length;
+			formFields.SickDatesPT = timesheet.SickDates.join(", ");
+			formFields.HolidayNumPT = timesheet.HolidayDates.length;
+			formFields.HolidayDatesPT = timesheet.HolidayDates.join(", ");
+		}
+
+		var timeSheetKeys = Object.keys(timesheet);
+		var keyLen = timeSheetKeys.length;
+		var timeKey;
+		while(keyLen--){
+			timeKey = timeSheetKeys[keyLen];
+			if(formFields.hasOwnProperty(timeKey)) {
+				formFields[timeKey] = timesheet[timeKey];
+			}
+		}
+		formFields.HolidayEarned = timesheet.EarnedHolidayDates.length || 0;
 	}
 };
 
 addUser.addEventListener("click", function(/* ev */) {
 	var hireDate;
 	var newUser = {
-		"name": "",
+		"EmployeeName": "",
 		"hireDate": {
 			"year": 0,
 			"month": 0,
 			"day": 0
 		},
-		"id": "",
+		"PersonNumber": "",
 		"initialSick": 0,
 		"initialHoliday": 0,
 		"initialVacation": 0,
@@ -117,15 +245,15 @@ addUser.addEventListener("click", function(/* ev */) {
 	};
 	if (newUserForm.style.display == "") {
 
-		newUser.name = nameElm.value;
-		newUser.id = idElm.value;
+		newUser.EmployeeName = nameElm.value;
+		newUser.PersonNumber = idElm.value;
 		newUser.initialSick = parseFloat(iSickElm.value);
 		newUser.initialHoliday = parseFloat(iHolidaElm.value);
 		newUser.initialVacation = parseFloat(iVacationElm.value);
 
 		hireDate = moment(hireDateElm.value, "YYYY-MM-DD");
 
-		if(newUser.name !== "" && hireDate.isValid()){
+		if(newUser.PersonNumber !== "" && hireDate.isValid()){
 
 			addUser.textContent = "Add New User";
 			newUserForm.style.display = "none";
@@ -152,13 +280,18 @@ addUser.addEventListener("click", function(/* ev */) {
 });
 
 var reportChanges = function(ev){
-	var target = ev.target;
+	var target;
+	if(ev){
+		target = ev.target;
+	}
+	else {
+		target = reports;
+	}
 	if (target.value !== "Select") {
 		localforage.getItem("timesheets").then(function(data) {
 			var thisUser = data[peeps.value],
-				thisTimesheet = thisUser.timeSheets[target.value];
-
-			userOperations.setPdfFields(thisUser, target.options[target.selectedIndex].text);
+				thisTimesheet = thisUser.timesheets[target.value];
+			userOperations.setPdfFields(thisUser, moment(target.options[target.selectedIndex].text, "YYYY-MM"), thisTimesheet);
 			renderTimesheet();
 		});
 	}
@@ -170,8 +303,9 @@ var loadTimesheets = function(data){
 		peeps.remove(curLength);
 	}
 	var len = data.length;
+	peeps.add(new Option("Select", "Select"));
 	while (len--) {
-		peeps.add(new Option(data[len].name, len));
+		peeps.add(new Option(data[len].EmployeeName, len));
 	}
 };
 
@@ -183,15 +317,22 @@ localforage.getItem("timesheets").then(function(data){
 	}
 	loadTimesheets(data);
 });
-peeps.addEventListener("change", function(ev) {
+var peepsChange = function(ev) {
+	var target;
+	if(ev){
+		target = ev.target;
+	}
+	else {
+		target = peeps;
+	}
 	var curLength = reports.options.length;
 	while (curLength--) {
 		reports.remove(curLength);
 	}
 	reports.add(new Option("Select Timesheet", "Select"));
-	if (ev.target.value !== "Select") {
+	if (target.value !== "Select") {
 		localforage.getItem("timesheets").then(function(data) {
-			var usersTimesheets = data[ev.target.value].timeSheets;
+			var usersTimesheets = data[target.value].timesheets;
 			var timeSheetIndexes = Object.keys(usersTimesheets);
 			var reportsLen = timeSheetIndexes.length;
 			while (reportsLen--) {
@@ -200,11 +341,6 @@ peeps.addEventListener("change", function(ev) {
 			}
 		});
 	}
-});
+};
 
-function saveDatabase() {
-	var blob = new Blob([JSON.stringify(Users)], {
-		type: "application/json;charset=utf-8"
-	});
-	saveAs(blob, "timeSheetDatabase.json");
-}
+peeps.addEventListener("change", peepsChange);

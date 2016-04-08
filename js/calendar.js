@@ -42,9 +42,13 @@ function dayToLocaleString(day) {
  * @param referenceDate {Date} A date object whose month will be displayed.
  */
 function simpleMonthCalendar(target, referenceDate) {
+	var targetElm = document.getElementById(target);
 
 	var date = new Date(referenceDate.getFullYear(), referenceDate.getMonth());
 	var cssClass, currDay, i;
+	var refMonth = referenceDate.getMonth();
+
+	targetElm.dataset.yearMonth = referenceDate.getFullYear() + "-" + ("0" + (refMonth + 1)).slice(-2);
 
 	var calendarTable = "<table class='calendar'><thead><tr class='heading_month'><th colspan='7'>" +
 		referenceDate.toLocaleDateString(navigator.language, {
@@ -59,7 +63,6 @@ function simpleMonthCalendar(target, referenceDate) {
 
 	calendarTable += "</thead><tbody id=\"calendarbody\"><tr>" + "<td></td>".repeat(date.getDay());
 
-	var refMonth = referenceDate.getMonth();
 	for (; date.getMonth() === refMonth; date.setDate(date.getDate() + 1)) {
 		currDay = date.getDay();
 		cssClass = (currDay === 0 || currDay === 6) ? "weekend" : "workday";
@@ -71,7 +74,8 @@ function simpleMonthCalendar(target, referenceDate) {
 	}
 	calendarTable += "<td></td>".repeat(7 - date.getDay()) + "</tr></tbody></table>";
 
-	document.getElementById(target).innerHTML = calendarTable;
+	targetElm.innerHTML = calendarTable;
+
 }
 
 function showLastMonth() {
@@ -83,7 +87,6 @@ function showLastMonth() {
 	var calendarbody = document.getElementById("calendarbody");
 
 	calendarbody.addEventListener("click", function(evt) {
-
 		var eventTarget = evt.originalTarget || evt.target;
 		var dayType = eventTarget.classList[0];
 
@@ -122,42 +125,80 @@ function showLastMonth() {
 var newTimesheet = document.getElementById("newtimesheet");
 newTimesheet.addEventListener("click", function(/*evt*/) {
 	var calendar = document.getElementById("calendar");
+	var viewer = document.getElementById("viewer");
 
 	switch(newTimesheet.textContent){
 		case "New Timesheet":
+			viewer.style.display = "none";
 			calendar.style.display = "";
 			showLastMonth();
 			newTimesheet.textContent = "View New Timesheet";
 			break;
 		case "View New Timesheet":
 			calendar.style.display = "none";
-
+			viewer.style.display = "";
 			var report = getReport();
 			userOperations.getCurrentUser().then(function(user){
 				//TODO: Get the real report Date from the calendar...
 				var earnedHolidays = [];
-				var reportDateParts = "2016-02".split("-");
-				if(observedHolidays[reportDateParts[0]] && observedHolidays[reportDateParts[0]][reportDateParts[1]]){
-					earnedHolidays = observedHolidays[reportDateParts[0]][reportDateParts[1]];
+				var reportDateParts = calendar.dataset.yearMonth.split("-");
+				var reportYear = reportDateParts[0];
+				var reportMonth = reportDateParts[1];
+				if(observedHolidays[reportYear] && observedHolidays[reportYear][reportMonth]){
+					earnedHolidays = observedHolidays[reportYear][reportMonth];
 				}
-				userOperations.setPdfFields(user, moment("2016-02", "YYYY-MM"), {
-					"Holiday Earned Dates": earnedHolidays,
-					"Vacation Dates": report.vacation,
-					"Sick Dates": report.sick,
-					"Holiday Dates": report.holiday
+				userOperations.setPdfFields(user, moment(calendar.dataset.yearMonth, "YYYY-MM"), {
+					"EarnedHolidayDates": earnedHolidays,
+					"VacaDates": report.vacation,
+					"SickDates": report.sick,
+					"HolidayDates": report.holiday
 				});
 				renderTimesheet();
 			});
-			newTimesheet.textContent = "Save Timesheet";
+			newTimesheet.textContent = "Save and Download Timesheet";
 			break;
-		case "Save Timesheet":
+		case "Save and Download Timesheet":
+			viewer.style.display = "none";
+			calendar.style.display = "none";
 			newTimesheet.textContent = "New Timesheet";
 			userOperations.getCurrentUser().then(function(user){
-				user.timesheets[getPdfFieldValue["Report Date"]] = {
-					"Vacation Dates": getPdfFieldValue[""].split(', '),
-					"Sick Dates": getPdfFieldValue[""].split(', '),
-					"Holiday Dates": getPdfFieldValue[""].split(', '),
+				var timeSheet = {};
+				var replacements = {};
+				var ignoredFIelds = ["ReportDate", "EmployeeName", "PersonNumber"];
+				[].slice.call(document.querySelectorAll("#viewer input")).forEach(function(elm){
+					//console.log(elm.id, elm.value, elm.type);
+					if(elm.type === "text" && elm.value !== "") {
+						replacements[elm.id] = elm.value;
+						if(ignoredFIelds.indexOf(elm.id) === -1){
+							if(elm.id.substr(-2) === "FT" || elm.id.substr(-2) === "PT"){
+								timeSheet[elm.id.substr(0, elm.id.length - 2)] = elm.value;
+							}
+							else {
+								timeSheet[elm.id] = elm.value;
+							}
+						}
+					}
+				});
+				if(timeSheet.hasOwnProperty("VacaDates")){
+					timeSheet.VacaDates = timeSheet.VacaDates.split(", ");
 				}
+				if(timeSheet.hasOwnProperty("SickDates")){
+					timeSheet.SickDates = timeSheet.SickDates.split(", ");
+				}
+				if(timeSheet.hasOwnProperty("HolidayDates")){
+					timeSheet.HolidayDates = timeSheet.HolidayDates.split(", ");
+				}
+				if(timeSheet.hasOwnProperty("EarnedHolidayDates")){
+					timeSheet.EarnedHolidayDates = timeSheet.EarnedHolidayDates.split(", ");
+				}
+				user.timesheets[document.getElementById("ReportPeriod").value] = timeSheet;
+				userOperations.saveCurrentUser(user);
+				fetch("/pdfs/rftsft-template-1.7.pdf").then(function(response){
+					response.arrayBuffer().then(function(bin){
+						replacePdfContents(bin, replacements);
+					});
+				});
+				peepsChange();
 			});
 			break;
 	}

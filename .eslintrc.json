@@ -6,7 +6,10 @@
 		"PDFJS": false,
 		"localforage": false,
 		"moment": false,
-		"setPdfField": false
+		"setPdfField": false,
+		"renderTimesheet": false,
+		"observedHolidays": false,
+		"userOperations": false
 	},
 	"parser": "babel-eslint",
 	"extends": "eslint:recommended",
