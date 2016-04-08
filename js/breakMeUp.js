@@ -74,13 +74,19 @@ localforage.getItem("timesheets").then(function(data){
 	}
 	return data;
 });
-var observedHolidays;
+var observedHolidays = {
+	"2016": {
+		"01": [1,18],
+		"02": [12,15],
+		"05": [30],
+		"07": [7],
+		"09": [5],
+		"10": [10],
+		"11": [8,11,24],
+		"12": [25,26]
+	}
+};
 
-fetch("/js/holidays.json").then(function(response){
-	return response.json();
-}).then(function(json) {
-	observedHolidays = json;
-});
 var userOperations = {
 	getCurrentUser: function(){
 		return localforage.getItem("timesheets").then(function(data){
