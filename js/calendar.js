@@ -197,7 +197,7 @@ newTimesheet.addEventListener("click", function(/*evt*/) {
 				}
 				user.timesheets[document.getElementById("ReportPeriod").value] = timeSheet;
 				userOperations.saveCurrentUser(user);
-				fetch("/pdfs/rftsft-template-1.7.pdf").then(function(response){
+				fetch("pdfs/rftsft-template-1.7.pdf").then(function(response){
 					response.arrayBuffer().then(function(bin){
 						replacePdfContents(bin, replacements);
 					});
